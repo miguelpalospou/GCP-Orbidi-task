@@ -10,6 +10,27 @@ This project sets up a serverless data pipeline using:
 
 ## 💡 Project Overview
 
+This project automates the deployment of a data pipeline on **Google Cloud Platform (GCP)** using **Terraform**, **BigQuery**, **Cloud Functions**, and **Cloud Scheduler**.
+
+We ingest, process, and enrich data from the **City of Chicago’s public datasets**, including weather data, to power analytical use cases.
+
+---
+
+## 📊 Project Context
+
+The City of Chicago offers rich public datasets such as:
+
+- **trips information**
+- **Traffic accidents**
+- **Inspections**
+- And more…
+
+We enhance this data by integrating **daily weather information**, fetched via a Cloud Function, and organize it into BigQuery datasets structured as:
+
+- `raw`: Ingested unprocessed data
+- `staging`: Cleaned and prepared for modeling
+- `mart`: Final analytical tables
+
 ### 🔧 Infrastructure
 - Deploys datasets in BigQuery (`raw`, `chicago_analytics_staging`, `chicago_analytics_marts`)
 - Cloud Function to pull weather data from API (e.g., NOAA or other)
