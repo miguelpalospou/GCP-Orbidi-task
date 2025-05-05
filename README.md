@@ -31,6 +31,12 @@ We enhance this data by integrating **daily weather information**, fetched via a
 - `staging`: Cleaned and prepared for modeling
 - `mart`: Final analytical tables
 
+We build a Looker [https://lookerstudio.google.com/u/0/reporting/2eea4d99-0daa-4889-8d5d-e05de24d47de/page/Gg3] Dashboard to visualize the results
+
+![image](https://github.com/user-attachments/assets/40015763-dc0c-4b13-8ae5-e548fe1f0ad4)
+
+
+
 ### 🔧 Infrastructure
 - Deploys datasets in BigQuery (`raw`, `chicago_analytics_staging`, `chicago_analytics_marts`)
 - Cloud Function to pull weather data from API (e.g., NOAA or other)
