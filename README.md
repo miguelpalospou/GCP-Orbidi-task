@@ -62,76 +62,104 @@ We enhance this data by integrating **daily weather information**, fetched via a
 ![image](https://github.com/user-attachments/assets/516dc248-5309-4ced-96eb-98ae327c0860)
 
 
-🛠️ Terraform Structure and Explanation
-This project uses Terraform to automate the deployment of a cloud data pipeline that ingests historical weather data for Chicago and stores it in BigQuery. Below is a detailed breakdown of each .tf file and module used in this setup.
+# 🛠️ Terraform Structure and Explanation
 
-📁 Root Files
-main.tf
-Entry point of the Terraform configuration.
+This project uses Terraform to automate the deployment of a cloud data pipeline that ingests historical weather data for Chicago and stores it in BigQuery. Below is a detailed breakdown of each `.tf` file and module used in this setup.
 
-Configures the google provider and references all other modules: storage, bq, function, scheduler, and iam.
+---
 
-Sets project-wide variables such as project ID and region.
+## 📁 Root Files
 
-variables.tf
-Declares all the variables used throughout the Terraform modules such as project ID, region, dataset, table name, etc.
+### `main.tf`
+- Entry point of the Terraform configuration.
+- Configures the Google provider and references all modules: `storage`, `bq`, `function`, `scheduler`, and `iam`.
+- Sets project-wide variables such as project ID and region.
 
-Provides default values and descriptions.
+### `variables.tf`
+- Declares all variables used throughout the Terraform modules such as:
+  - Project ID
+  - Region
+  - Dataset name
+  - Table name
+- Provides default values and descriptions.
 
-outputs.tf
-Exposes useful output values after applying Terraform.
+### `outputs.tf`
+- Exposes useful output values after applying Terraform.
+- Typically includes:
+  - Bucket names
+  - Cloud Function URLs
+  - Dataset or table info
 
-Typically includes bucket names, function URLs, etc.
+---
 
-📦 Modules
-modules/storage/
-Purpose: Creates a Cloud Storage bucket used to store the source code for the Cloud Function.
+## 📦 Modules
 
-main.tf:
+### `modules/storage/`
 
-Defines a google_storage_bucket resource.
+**Purpose**: Creates a Cloud Storage bucket used to store the source code for the Cloud Function.
 
-Bucket is later used by the Cloud Function deployment to upload the zipped code.
+#### `main.tf`
+- Defines a `google_storage_bucket` resource.
+- This bucket is used by the Cloud Function deployment to upload the zipped function code.
 
-modules/bq/
-Purpose: Sets up a BigQuery dataset and table for storing weather data.
+---
 
-main.tf:
+### `modules/bq/`
 
-Creates a dataset using google_bigquery_dataset.
+**Purpose**: Sets up a BigQuery dataset and table for storing weather data.
 
-Creates a table with schema fields for weather metrics using google_bigquery_table.
+#### `main.tf`
+- Creates a dataset using `google_bigquery_dataset`.
+- Creates a table using `google_bigquery_table`, including schema definitions for:
+  - Date
+  - Mean temperature
+  - Precipitation
+  - Cloud cover
+  - Wind speed
 
-modules/function/
-Purpose: Deploys the Cloud Function that fetches and uploads weather data.
+---
 
-main.tf:
+### `modules/function/`
 
-Creates a google_cloudfunctions2_function with HTTP trigger.
+**Purpose**: Deploys a Cloud Function that fetches weather data and loads it into BigQuery.
 
-Sets environment variables for the project, dataset, and table.
+#### `main.tf`
+- Defines a `google_cloudfunctions2_function` with an HTTP trigger.
+- Sets environment variables: project ID, dataset, table.
+- Connects to the code stored in the storage bucket.
+- Configures execution roles and permissions.
 
-Points to the zipped code stored in the GCS bucket.
+---
 
-modules/scheduler/
-Purpose: Sets up a Cloud Scheduler job that triggers the Cloud Function periodically.
+### `modules/scheduler/`
 
-main.tf:
+**Purpose**: Schedules the execution of the Cloud Function.
 
-Creates a google_cloud_scheduler_job to send HTTP POST requests to the function's endpoint.
+#### `main.tf`
+- Creates a `google_cloud_scheduler_job`.
+- Uses HTTP target to call the function's endpoint.
+- Schedule is configurable using a CRON expression.
 
-Configurable frequency using cron syntax.
+---
 
-modules/iam/
-Purpose: Grants the necessary IAM roles to service accounts and users for the pipeline to run correctly.
+### `modules/iam/`
 
-main.tf:
+**Purpose**: Manages IAM role bindings for required identities.
 
-Uses google_project_iam_member to assign multiple roles (e.g. Cloud Build Editor, Cloud Functions Admin, BigQuery roles, Artifact Registry roles) to:
-
-Your user (e.g. miguelpalospou)
-
-The default Compute Engine service account (e.g. PROJECT_NUMBER-compute@developer.gserviceaccount.com)
+#### `main.tf`
+- Assigns roles to:
+  - Your user (e.g., `miguelpalospou`)
+  - The auto-generated Compute Engine service account (e.g., `PROJECT_NUMBER-compute@developer.gserviceaccount.com`)
+- Roles include:
+  - `Artifact Registry Administrator`
+  - `Artifact Registry Reader`
+  - `Artifact Registry Writer`
+  - `BigQuery Recommender Project Viewer`
+  - `Cloud Build Editor`
+  - `Cloud Functions Admin`
+  - `Logs Viewer`
+  - `Logs Writer`
+  - `Storage Object Viewer`
 
 Ensures all components have permission to read/write GCS, execute functions, and load data to BigQuery.
 ---
